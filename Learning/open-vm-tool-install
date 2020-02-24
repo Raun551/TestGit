@@ -1,0 +1,125 @@
+#!/bin/bash
+echo "Removing Open-VM-Tools"
+sleep 2s
+yum remove open-vm-tools -y
+echo "Installing dependencies"
+sleep 2s
+yum install -y git libtool libmspack*  glib2 pam-devel libxml2*  xmlsec1-devel libX11-devel libXi-devel libXinerama-devel libXrender-devel libXrandr-devel libXtst-devel gdk-pixbuf2-devel gtk3-devel gtkmm3 gcc-c++ gtkmm* libgtkmm* libtool-ltdl-devel
+echo "cloing git repo"
+git clone https://github.com/vmware/open-vm-tools.git
+sleep 2s
+pushd /root/open-vm-tools/open-vm-tools
+sleep 2s
+echo "##############Beginning to install open-vm-tools############"
+sleep 5s
+autoreconf -i
+./configure
+make
+make install
+ldconfig
+echo "######### Create service files #########"
+echo "[Unit]
+Description=Service for virtual machines hosted on VMware
+Documentation=http://github.com/vmware/open-vm-tools
+ConditionVirtualization=vmware
+Requires=vgauthd.service
+After=vgauthd.service
+DefaultDependencies=no
+Before=cloud-init-local.service
+
+[Service]
+ExecStart=/usr/local/bin/vmtoolsd
+TimeoutStopSec=5
+
+[Install]
+WantedBy=multi-user.target
+Also=vgauthd.service" >> /usr/lib/systemd/system/vmtoolsd.service
+
+echo "[Unit]
+Description=Service for virtual machines hosted on VMware
+Documentation=http://github.com/vmware/open-vm-tools
+ConditionVirtualization=vmware
+Requires=vgauthd.service
+After=vgauthd.service
+DefaultDependencies=no
+
+[Service]
+ExecStart=/usr/local/bin/vmtoolsd
+TimeoutStopSec=5
+
+[Install]
+WantedBy=multi-user.target
+Also=vgauthd.service" >> /etc/systemd/system/multi-user.target.wants/vmtoolsd.service
+
+echo "[Unit]
+Description=VGAuth Service for open-vm-tools
+Documentation=http://github.com/vmware/open-vm-tools
+ConditionVirtualization=vmware
+PartOf=vmtoolsd.service
+
+[Service]
+ExecStart=/usr/local/bin/VGAuthService -s
+TimeoutStopSec=5
+
+[Install]
+RequiredBy=vmtoolsd.service" >> /usr/lib/systemd/system/vgauthd.service
+
+echo "########### Service files created . Start and Enable VMtoolsd ##########"
+
+systemctl start vmtoolsd
+systemctl enable vmtoolsd
+systemctl daemon-reload
+systemctl status vmtoolsd
+echo " ##### delete the script and logout #######"
+
+cat << EOF | tee /usr/lib/systemd/system/vmtoolsd.service
+[Unit]
+Description=Service for virtual machines hosted on VMware
+Documentation=http://github.com/vmware/open-vm-tools
+ConditionVirtualization=vmware
+Requires=vgauthd.service
+After=vgauthd.service
+DefaultDependencies=no
+Before=cloud-init-local.service
+
+[Service]
+ExecStart=/usr/local/bin/vmtoolsd
+TimeoutStopSec=5
+
+[Install]
+WantedBy=multi-user.target
+Also=vgauthd.service
+EOF
+
+cat << EOF | tee /etc/systemd/system/multi-user.target.wants/vmtoolsd.service
+[Unit]
+Description=Service for virtual machines hosted on VMware
+Documentation=http://github.com/vmware/open-vm-tools
+ConditionVirtualization=vmware
+Requires=vgauthd.service
+After=vgauthd.service
+DefaultDependencies=no
+
+[Service]
+ExecStart=/usr/local/bin/vmtoolsd
+TimeoutStopSec=5
+
+[Install]
+WantedBy=multi-user.target
+Also=vgauthd.service
+EOF
+
+cat << EOF | tee /usr/lib/systemd/system/vgauthd.service
+[Unit]
+Description=VGAuth Service for open-vm-tools
+Documentation=http://github.com/vmware/open-vm-tools
+ConditionVirtualization=vmware
+PartOf=vmtoolsd.service
+
+[Service]
+ExecStart=/usr/local/bin/VGAuthService -s
+TimeoutStopSec=5
+
+[Install]
+RequiredBy=vmtoolsd.service
+EOF
