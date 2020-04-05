@@ -36,22 +36,6 @@ WantedBy=multi-user.target
 Also=vgauthd.service" >> /usr/lib/systemd/system/vmtoolsd.service
 
 echo "[Unit]
-Description=Service for virtual machines hosted on VMware
-Documentation=http://github.com/vmware/open-vm-tools
-ConditionVirtualization=vmware
-Requires=vgauthd.service
-After=vgauthd.service
-DefaultDependencies=no
-
-[Service]
-ExecStart=/usr/local/bin/vmtoolsd
-TimeoutStopSec=5
-
-[Install]
-WantedBy=multi-user.target
-Also=vgauthd.service" >> /etc/systemd/system/multi-user.target.wants/vmtoolsd.service
-
-echo "[Unit]
 Description=VGAuth Service for open-vm-tools
 Documentation=http://github.com/vmware/open-vm-tools
 ConditionVirtualization=vmware
@@ -65,7 +49,6 @@ TimeoutStopSec=5
 RequiredBy=vmtoolsd.service" >> /usr/lib/systemd/system/vgauthd.service
 
 echo "########### Service files created . Start and Enable VMtoolsd ##########"
-
 systemctl start vmtoolsd
 systemctl enable vmtoolsd
 systemctl daemon-reload
