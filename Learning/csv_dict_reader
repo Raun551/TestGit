@@ -1,0 +1,10 @@
+import csv
+with open("/home/raunaq.malik/Documents/git/TestGit/learning_files/software.csv","r") as software:
+	reader = csv.DictReader(software)
+	for row in reader:
+		print("{} has {} users".format(row["name"],row["users"]))
+ 
+#MailTree has 5542 users
+#Zimbra has 51925123 users
+#RaunSoft has 4 users
+
