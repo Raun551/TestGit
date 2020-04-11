@@ -1,0 +1,9 @@
+import os
+#print current working directory
+print(os.getcwd())
+# make new directory in current working directory
+os.mkdir("dir_name")
+#change directory
+os.chdir("dir_name")
+#return all files and subdir in given directory
+os.listdir("dir_name")
