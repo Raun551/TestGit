@@ -1,1 +1,1 @@
-I am editing the README file. Adding some more details about the project description.
+This is the place where I learn python and add what I have learnt.
